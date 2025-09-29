@@ -1,26 +1,46 @@
-const form = document.getElementById("form");
-const input = document.getElementById("q");
-const resultDiv = document.getElementById("resultado");
+const form = document.querySelector("form");
+const input = document.querySelector("#question");
+const output = document.querySelector("#answer");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const question = input.value.trim();
-  if (!question) return alert("Por favor ingresa una pregunta");
+  const pregunta = input.value.trim();
+  if (!pregunta) {
+    output.textContent = "⚠️ Por favor escribe una pregunta.";
+    return;
+  }
 
-  resultDiv.textContent = "⏳ Generando itinerario...";
+  output.textContent = "⏳ Generando respuesta...";
+
   try {
     const res = await fetch("/api/ask", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question })
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ question: pregunta }),
     });
-    const data = await res.json();
-    if (data.error) {
-      resultDiv.textContent = "⚠️ " + data.error;
-    } else {
-      resultDiv.textContent = data.answer;
+
+    if (!res.ok) {
+      // Respuesta HTTP no fue 200-299
+      const texto = await res.text();
+      output.textContent = `⚠️ Error del servidor (${res.status}): ${texto}`;
+      return;
     }
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (err) {
+      const texto = await res.text();
+      output.textContent = `⚠️ Respuesta no es JSON válido:\n${texto}`;
+      return;
+    }
+
+    // Si todo bien, mostrar la respuesta
+    output.textContent = data.answer || "⚠️ El servidor no devolvió respuesta.";
   } catch (err) {
-    resultDiv.textContent = "⚠️ Error en la solicitud: " + err;
+    // Error de red o fallo inesperado
+    output.textContent = `⚠️ No se pudo conectar con el servidor:\n${err.message}`;
   }
 });
