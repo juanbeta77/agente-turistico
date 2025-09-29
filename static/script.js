@@ -1,41 +1,44 @@
-const form = document.querySelector("form");
+const form = document.querySelector("#travel-form");
 const input = document.querySelector("#question");
-const output = document.querySelector("#answer");
+const chatBox = document.querySelector("#chat-box");
+
+function addMessage(text, sender) {
+  const div = document.createElement("div");
+  div.className = `message ${sender}`;
+  div.textContent = text;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const pregunta = input.value.trim();
-  if (!pregunta) {
-    output.textContent = "⚠️ Por favor escribe una pregunta.";
-    return;
-  }
+  const question = input.value.trim();
+  if (!question) return;
 
-  output.textContent = "⏳ Generando respuesta...";
+  addMessage(question, "user");
+  input.value = "";
+
+  const loading = document.createElement("div");
+  loading.className = "message bot";
+  loading.textContent = "⏳ Generando respuesta...";
+  chatBox.appendChild(loading);
+  chatBox.scrollTop = chatBox.scrollHeight;
 
   try {
     const res = await fetch("/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: pregunta })
+      body: JSON.stringify({ question })
     });
 
     if (!res.ok) {
-      const texto = await res.text();
-      output.textContent = `⚠️ Error del servidor (${res.status}): ${texto}`;
+      loading.textContent = `⚠️ Error del servidor (${res.status})`;
       return;
     }
 
-    let data;
-    try {
-      data = await res.json();
-    } catch (err) {
-      const texto = await res.text();
-      output.textContent = `⚠️ Respuesta no es JSON válido:\n${texto}`;
-      return;
-    }
-
-    output.textContent = data.answer || "⚠️ El servidor no devolvió respuesta.";
+    const data = await res.json();
+    loading.textContent = data.answer || "⚠️ No se recibió respuesta del servidor.";
   } catch (err) {
-    output.textContent = `⚠️ No se pudo conectar con el servidor:\n${err.message}`;
+    loading.textContent = `⚠️ Error de conexión: ${err.message}`;
   }
 });
