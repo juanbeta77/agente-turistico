@@ -16,18 +16,12 @@ form.addEventListener("submit", async (e) => {
     const res = await fetch("/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: pregunta })
+      body: JSON.stringify({ question: pregunta }),
     });
-
-    if (!res.ok) {
-      const texto = await res.text();
-      output.textContent = `⚠️ Error del servidor (${res.status}): ${texto}`;
-      return;
-    }
 
     const data = await res.json();
     output.textContent = data.answer || "⚠️ El servidor no devolvió respuesta.";
   } catch (err) {
-    output.textContent = `⚠️ No se pudo conectar con el servidor:\n${err.message}`;
+    output.textContent = `⚠️ Error de conexión: ${err.message}`;
   }
 });
