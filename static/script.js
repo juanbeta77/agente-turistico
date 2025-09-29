@@ -1,44 +1,33 @@
-const form = document.querySelector("#travel-form");
+const form = document.querySelector("form");
 const input = document.querySelector("#question");
-const chatBox = document.querySelector("#chat-box");
-
-function addMessage(text, sender) {
-  const div = document.createElement("div");
-  div.className = `message ${sender}`;
-  div.textContent = text;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
+const output = document.querySelector("#answer");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const question = input.value.trim();
-  if (!question) return;
+  const pregunta = input.value.trim();
+  if (!pregunta) {
+    output.textContent = "⚠️ Por favor escribe una pregunta.";
+    return;
+  }
 
-  addMessage(question, "user");
-  input.value = "";
-
-  const loading = document.createElement("div");
-  loading.className = "message bot";
-  loading.textContent = "⏳ Generando respuesta...";
-  chatBox.appendChild(loading);
-  chatBox.scrollTop = chatBox.scrollHeight;
+  output.textContent = "⏳ Generando respuesta...";
 
   try {
     const res = await fetch("/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question })
+      body: JSON.stringify({ question: pregunta })
     });
 
     if (!res.ok) {
-      loading.textContent = `⚠️ Error del servidor (${res.status})`;
+      const texto = await res.text();
+      output.textContent = `⚠️ Error del servidor (${res.status}): ${texto}`;
       return;
     }
 
     const data = await res.json();
-    loading.textContent = data.answer || "⚠️ No se recibió respuesta del servidor.";
+    output.textContent = data.answer || "⚠️ El servidor no devolvió respuesta.";
   } catch (err) {
-    loading.textContent = `⚠️ Error de conexión: ${err.message}`;
+    output.textContent = `⚠️ No se pudo conectar con el servidor:\n${err.message}`;
   }
 });
