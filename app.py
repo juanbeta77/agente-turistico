@@ -38,15 +38,25 @@ def call_openai(prompt: str):
         print("Error con OpenAI:", e)
         return f"⚠️ Error al generar respuesta con IA: {str(e)}"
 
-@app.route("/api/ask", methods=["POST"])
+#@app.route("/api/ask", methods=["POST"])
+#def ask():
+ #   try:
+  #      data = request.get_json(force=True)
+   #     question = data.get("question", "").strip()
+    #    if not question:
+     #       return jsonify({"answer": "El campo 'question' no puede estar vacío."})
+   # except Exception as e:
+    #    return jsonify({"answer": f"JSON inválido o mal formado. Detalles: {str(e)}"})
+
+    @app.route("/api/ask", methods=["POST"])
 def ask():
-    try:
-        data = request.get_json(force=True)
-        question = data.get("question", "").strip()
-        if not question:
-            return jsonify({"answer": "El campo 'question' no puede estar vacío."})
-    except Exception as e:
-        return jsonify({"answer": f"JSON inválido o mal formado. Detalles: {str(e)}"})
+    data = request.get_json()
+    print("DATA RECIBIDA:", data)
+    question = data.get("question", "").strip()
+    print("PREGUNTA:", question)
+    if not question:
+        return jsonify({"error": "Debes enviar 'question' en el body"}), 400
+
 
     try:
         prompt = f"""
