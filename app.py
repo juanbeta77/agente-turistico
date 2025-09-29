@@ -21,6 +21,7 @@ def call_openai(prompt: str):
     if not OPENAI_KEY:
         return "⚠️ No se encontró OPENAI_API_KEY. Configúrala en .env para usar la IA."
     try:
+        print("Prompt enviado a OpenAI:\n", prompt)  # Depuración
         response = openai.ChatCompletion.create(
             model=OPENAI_MODEL,
             messages=[
@@ -30,39 +31,38 @@ def call_openai(prompt: str):
             temperature=OPENAI_TEMP,
             max_tokens=OPENAI_MAX_TOKENS
         )
-        return response["choices"][0]["message"]["content"].strip()
+        answer = response["choices"][0]["message"]["content"].strip()
+        print("Respuesta de OpenAI:\n", answer)  # Depuración
+        return answer
     except Exception as e:
         print("Error con OpenAI:", e)
-        return "⚠️ Error al generar respuesta con IA."
+        return f"⚠️ Error al generar respuesta con IA: {str(e)}"
 
 @app.route("/api/ask", methods=["POST"])
 def ask():
     try:
-        data = request.get_json(force=True)  # fuerza parseo JSON
+        data = request.get_json(force=True)
+        question = data.get("question", "").strip()
+        if not question:
+            return jsonify({"answer": "El campo 'question' no puede estar vacío."})
     except Exception as e:
-        return jsonify({"error": "JSON inválido o mal formado.", "details": str(e)}), 400
+        return jsonify({"answer": f"JSON inválido o mal formado. Detalles: {str(e)}"})
 
-    if not data or "question" not in data:
-        return jsonify({"error": "Debes enviar 'question' en el body"}), 400
-
-    question = data.get("question", "").strip()
-    if not question:
-        return jsonify({"error": "El campo 'question' no puede estar vacío."}), 400
-
-    # Construir prompt
-    prompt = f"""
-    Actúa como un planificador de viajes.
-    Usuario: {question}
-    Genera:
-    - Clima esperado
-    - Costos aproximados
-    - Lugares para visitar
-    - Itinerario diario
-    Usa viñetas y separa bien por secciones.
-    """
-
-    result = call_openai(prompt)
-    return jsonify({"answer": result + DISCLAIMER})
+    try:
+        prompt = f"""
+        Actúa como un planificador de viajes.
+        Usuario: {question}
+        Genera:
+        - Clima esperado
+        - Costos aproximados
+        - Lugares para visitar
+        - Itinerario diario
+        Usa viñetas y separa bien por secciones.
+        """
+        result = call_openai(prompt)
+        return jsonify({"answer": result + DISCLAIMER})
+    except Exception as e:
+        return jsonify({"answer": f"⚠️ Error inesperado: {str(e)}"})
 
 @app.route("/")
 def index():
