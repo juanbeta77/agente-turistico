@@ -3,7 +3,6 @@ import json
 import os
 import openai
 
-# Variables de entorno
 OPENAI_KEY = os.environ.get("OPENAI_API_KEY")
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 OPENAI_TEMP = float(os.environ.get("OPENAI_TEMPERATURE", 0.7))
@@ -14,7 +13,8 @@ DISCLAIMER = "\n\n⚠️ Esta es una recomendación generada por IA. Verifica in
 
 def handler(request, context):
     try:
-        body = json.loads(request.body)
+        # request.body viene como bytes en Vercel, así que lo decodificamos
+        body = json.loads(request.body.decode("utf-8"))
         question = body.get("question", "").strip()
         if not question:
             return {
