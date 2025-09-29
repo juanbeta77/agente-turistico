@@ -37,10 +37,17 @@ def call_openai(prompt: str):
 
 @app.route("/api/ask", methods=["POST"])
 def ask():
-    data = request.get_json()
+    try:
+        data = request.get_json(force=True)  # fuerza parseo JSON
+    except Exception as e:
+        return jsonify({"error": "JSON inválido o mal formado.", "details": str(e)}), 400
+
+    if not data or "question" not in data:
+        return jsonify({"error": "Debes enviar 'question' en el body"}), 400
+
     question = data.get("question", "").strip()
     if not question:
-        return jsonify({"error": "Debes enviar 'question' en el body"}), 400
+        return jsonify({"error": "El campo 'question' no puede estar vacío."}), 400
 
     # Construir prompt
     prompt = f"""
@@ -62,5 +69,4 @@ def index():
     return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
