@@ -1,34 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Agente turístico</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agente Turístico</title>
 </head>
 <body>
-  <div class="chat-container">
-    <header class="chat-header">
-      <h1>Agente turístico conversacional</h1>
-      <p>Tu asistente personal para planificar viajes</p>
-    </header>
+  <h1>Agente Turístico IA</h1>
+  <form>
+    <input type="text" id="question" placeholder="Escribe tu viaje, por ejemplo: 'Viaje a París 5 días'">
+    <button type="submit">Enviar</button>
+  </form>
+  <pre id="answer"></pre>
 
-    <main id="chat-box" class="chat-box">
-      <div class="message bot">
-        ¡Hola! Soy tu agente turístico. Pregúntame por clima, costos, lugares o un itinerario indicando días y tema si quieres.
-      </div>
-    </main>
-
-    <form id="travel-form" class="chat-form">
-      <input type="text" id="question" name="question" placeholder="Escribe tu pregunta de viaje..." required/>
-      <button type="submit">Enviar</button>
-    </form>
-
-    <footer class="chat-footer">
-      © 2025 Planificador de Viajes - Proyecto educativo
-    </footer>
-  </div>
-
-  <script src="script.js" defer></script>
+  <script src="script.js"></script>
 </body>
 </html>
